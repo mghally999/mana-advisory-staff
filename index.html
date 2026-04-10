@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mana Advisory — Staff Directory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --gold:        #C9A84C;
+      --gold-light:  #E8C97B;
+      --gold-dim:    #7a6027;
+      --ink:         #0D0D0D;
+      --surface:     #111213;
+      --card:        #18191C;
+      --line:        rgba(201,168,76,0.15);
+      --line-strong: rgba(201,168,76,0.35);
+      --text:        #E8E2D5;
+      --muted:       #7A7570;
+      --white:       #FAFAF8;
+
+      /* Company badge colours */
+      --c-mana:       #C9A84C;
+      --c-kha:        #4C9EC9;
+      --c-mazboat:    #C94C6E;
+      --c-montaigne:  #8B6EC9;
+      --c-jupiter:    #4CC97E;
+      --c-serva:      #C97A4C;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--ink);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: .4;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: relative;
+      z-index: 10;
+      padding: 64px 60px 48px;
+      border-bottom: 1px solid var(--line-strong);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 32px;
+      flex-wrap: wrap;
+      animation: fadeDown .8s ease both;
+    }
+
+    .header-brand { display: flex; flex-direction: column; gap: 6px; }
+
+    .brand-eyebrow {
+      font-size: 10px;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 400;
+    }
+
+    .brand-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 300;
+      line-height: 1;
+      color: var(--white);
+    }
+
+    .brand-title em {
+      font-style: italic;
+      color: var(--gold-light);
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .header-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .header-count {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3rem;
+      font-weight: 300;
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .header-count-label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+
+    /* ── CONTROLS ── */
+    .controls {
+      position: relative;
+      z-index: 10;
+      padding: 28px 60px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--line);
+      animation: fadeDown .8s .1s ease both;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+      max-width: 360px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--gold-dim);
+      pointer-events: none;
+      font-size: 14px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--line-strong);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      padding: 10px 14px 10px 38px;
+      border-radius: 6px;
+      outline: none;
+      transition: border-color .25s, box-shadow .25s;
+    }
+
+    .search-input::placeholder { color: var(--muted); }
+    .search-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,.12);
+    }
+
+    /* Filter chips */
+    .filter-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .chip {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--line-strong);
+      background: transparent;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      letter-spacing: .06em;
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+    }
+
+    .chip:hover { border-color: var(--gold-dim); color: var(--gold-light); }
+
+    .chip.active {
+      border-color: var(--gold);
+      background: rgba(201,168,76,.1);
+      color: var(--gold-light);
+    }
+
+    /* ── TABLE WRAPPER ── */
+    .table-wrap {
+      position: relative;
+      z-index: 10;
+      padding: 40px 60px 80px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 6px;
+    }
+
+    thead th {
+      font-size: 10px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      padding: 0 20px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--line-strong);
+      font-weight: 500;
+    }
+
+    thead th:first-child { padding-left: 24px; }
+
+    /* ── TABLE ROWS ── */
+    tbody tr {
+      background: var(--card);
+      cursor: default;
+      transition: background .22s, transform .22s, box-shadow .22s;
+      animation: rowIn .5s ease both;
+    }
+
+    tbody tr:hover {
+      background: #1e2025;
+      transform: translateX(4px);
+      box-shadow: -4px 0 0 var(--gold), 0 4px 32px rgba(0,0,0,.4);
+    }
+
+    td {
+      padding: 18px 20px;
+      font-size: 13.5px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+
+    td:first-child {
+      border-left: 1px solid var(--line);
+      border-radius: 8px 0 0 8px;
+      padding-left: 24px;
+    }
+
+    td:last-child {
+      border-right: 1px solid var(--line);
+      border-radius: 0 8px 8px 0;
+    }
+
+    tbody tr:hover td {
+      border-color: var(--line-strong);
+    }
+
+    /* Name cell */
+    .name-cell { display: flex; flex-direction: column; gap: 2px; }
+
+    .name-main {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px;
+      font-weight: 400;
+      color: var(--white);
+      letter-spacing: .01em;
+    }
+
+    .name-note {
+      font-size: 10.5px;
+      color: var(--gold-dim);
+      font-style: italic;
+    }
+
+    /* Email */
+    .email-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 12.5px;
+      transition: color .2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .email-link:hover { color: var(--gold-light); }
+
+    .email-domain { color: var(--muted); opacity: .6; }
+
+    /* Designation */
+    .designation {
+      font-size: 13px;
+      color: var(--text);
+      font-weight: 400;
+    }
+
+    /* Company badge */
+    .company-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      letter-spacing: .06em;
+      font-weight: 500;
+      white-space: nowrap;
+      border: 1px solid;
+    }
+
+    .dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+    .badge-mana      { color: var(--c-mana);      border-color: rgba(201,168,76,.3);   background: rgba(201,168,76,.07); }
+    .badge-kha       { color: var(--c-kha);        border-color: rgba(76,158,201,.3);   background: rgba(76,158,201,.07); }
+    .badge-mazboat   { color: var(--c-mazboat);    border-color: rgba(201,76,110,.3);   background: rgba(201,76,110,.07); }
+    .badge-montaigne { color: var(--c-montaigne);  border-color: rgba(139,110,201,.3);  background: rgba(139,110,201,.07); }
+    .badge-jupiter   { color: var(--c-jupiter);    border-color: rgba(76,201,126,.3);   background: rgba(76,201,126,.07); }
+    .badge-serva     { color: var(--c-serva);       border-color: rgba(201,122,76,.3);   background: rgba(201,122,76,.07); }
+    .badge-multi     { color: #ddd; border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.04); }
+
+    .dot-mana      { background: var(--c-mana); }
+    .dot-kha       { background: var(--c-kha); }
+    .dot-mazboat   { background: var(--c-mazboat); }
+    .dot-montaigne { background: var(--c-montaigne); }
+    .dot-jupiter   { background: var(--c-jupiter); }
+    .dot-serva     { background: var(--c-serva); }
+    .dot-multi     { background: #aaa; }
+
+    /* Row number */
+    .row-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 13px;
+      color: var(--gold-dim);
+      width: 32px;
+      text-align: right;
+    }
+
+    /* No results */
+    .no-results {
+      display: none;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      font-style: italic;
+    }
+
+    /* ── GOLD DIVIDER ── */
+    .gold-line {
+      width: 60px;
+      height: 1px;
+      background: var(--gold);
+      margin: 4px 0 0;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 10;
+      border-top: 1px solid var(--line);
+      padding: 24px 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-text {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: .08em;
+    }
+
+    .footer-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: var(--gold-dim);
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes rowIn {
+      from { opacity: 0; transform: translateX(-12px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Stagger rows */
+    tbody tr:nth-child(1)  { animation-delay: .05s; }
+    tbody tr:nth-child(2)  { animation-delay: .10s; }
+    tbody tr:nth-child(3)  { animation-delay: .15s; }
+    tbody tr:nth-child(4)  { animation-delay: .20s; }
+    tbody tr:nth-child(5)  { animation-delay: .25s; }
+    tbody tr:nth-child(6)  { animation-delay: .30s; }
+    tbody tr:nth-child(7)  { animation-delay: .35s; }
+    tbody tr:nth-child(8)  { animation-delay: .40s; }
+    tbody tr:nth-child(9)  { animation-delay: .45s; }
+    tbody tr:nth-child(10) { animation-delay: .50s; }
+    tbody tr:nth-child(11) { animation-delay: .55s; }
+    tbody tr:nth-child(12) { animation-delay: .60s; }
+    tbody tr:nth-child(13) { animation-delay: .65s; }
+    tbody tr:nth-child(14) { animation-delay: .70s; }
+    tbody tr:nth-child(15) { animation-delay: .75s; }
+    tbody tr:nth-child(16) { animation-delay: .80s; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      header, .controls, .table-wrap, footer { padding-left: 20px; padding-right: 20px; }
+      .header-meta { align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-brand">
+      <span class="brand-eyebrow">Group Companies</span>
+      <h1 class="brand-title">Mana <em>Advisory</em></h1>
+      <div class="gold-line"></div>
+      <p class="brand-sub">Staff Directory &amp; Designations</p>
+    </div>
+    <div class="header-meta">
+      <span class="header-count" id="visibleCount">16</span>
+      <span class="header-count-label">Members</span>
+    </div>
+  </header>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input class="search-input" type="text" id="searchInput" placeholder="Search name, email, role…"/>
+    </div>
+    <div class="filter-chips">
+      <button class="chip active" data-filter="all">All</button>
+      <button class="chip" data-filter="mana">Mana Advisory</button>
+      <button class="chip" data-filter="kha">KHA Marine</button>
+      <button class="chip" data-filter="mazboat">Mazboat</button>
+      <button class="chip" data-filter="montaigne">Montaigne</button>
+      <button class="chip" data-filter="jupiter">Jupiter</button>
+      <button class="chip" data-filter="serva">Serva</button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table id="staffTable">
+      <thead>
+        <tr>
+          <th style="width:40px">#</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Designation</th>
+          <th>Company</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+
+        <!-- 1. MATAR -->
+        <tr data-companies="mana">
+          <td class="row-num">01</td>
+          <td><div class="name-cell"><span class="name-main">Matar</span></div></td>
+          <td><a class="email-link" href="mailto:matar@manaadvisory.ae">matar<span class="email-domain">@manaadvisory.ae</span></a></td>
+          <td><span class="designation">General Manager</span></td>
+          <td><span class="company-badge badge-mana"><span class="dot dot-mana"></span>Mana Advisory</span></td>
+        </tr>
+
+        <!-- 2. NASH JIWANI -->
+        <tr data-companies="mana">
+          <td class="row-num">02</td>
+          <td><div class="name-cell"><span class="name-main">Nash Jiwani</span></div></td>
+          <td><a class="email-link" href="mailto:nash@manauae.com">nash<span class="email-domain">@manauae.com</span></a></td>
+          <td><span class="designation">Managing Director</span></td>
+          <td><span class="company-badge badge-mana"><span class="dot dot-mana"></span>Mana Advisory</span></td>
+        </tr>
+
+        <!-- 3. AARAIZ FAISAL -->
+        <tr data-companies="kha">
+          <td class="row-num">03</td>
+          <td><div class="name-cell"><span class="name-main">Aaraiz Faisal</span></div></td>
+          <td><a class="email-link" href="mailto:aaraiz.faisal@manaadvisory.ae">aaraiz.faisal<span class="email-domain">@manaadvisory.ae</span></a></td>
+          <td><span class="designation">Business Development Manager</span></td>
+          <td><span class="company-badge badge-kha"><span class="dot dot-kha"></span>KHA Marine</span></td>
+        </tr>
+
+        <!-- 4. ALFAISAL JAHANGEER -->
+        <tr data-companies="jupiter">
+          <td class="row-num">04</td>
+          <td><div class="name-cell"><span class="name-main">Alfaisal Jahangeer</span></div></td>
+          <td><a class="email-link" href="mailto:alfaisal.jahangeer@manaadvisory.ae">alfaisal.jahangeer<span class="email-domain">@manaadvisory.ae</span></a></td>
+          <td><span class="designation">Civil Engineer</span></td>
+          <td><span class="company-badge badge-jupiter"><span class="dot dot-jupiter"></span>Jupiter</span></td>
+        </tr>
+
+        <!-- 5. CHARLES BAS -->
+        <tr data-companies="mana">
+          <td class="row-num">05</td>
+          <td><div class="name-cell"><span class="name-main">Charles Bas</span></div></td>
+          <td><a class="email-link" href="mailto:charles@manaadvisory.ae">charles<span class="email-domain">@manaadvisory.ae</span></a></td>
+          <td><span class="designation">Business Development Manager</span></td>
+          <td><span class="company-badge badge-mana"><span class="dot dot-mana"></span>Mana Advisory</span></td>
+        </tr>
+
+        <!-- 6. DARLENE DEREQUITO -->
+        <tr data-companies="mana">
+          <td class="row-num">06</td>
+          <td><div class="name-cell"><span class="name-main">Darlene Derequito</span></div></td>
+          <td><a class="email-link" href="mailto:darlene.derequito@manaadvisory.ae">darlene.derequito<span class="email-domain">@manaadvisory.ae</span></a></td>
+          <td><span class="designation">Admin</span></td>
+          <td><span class="company-badge badge-mana"><span class="dot dot-mana"></span>Mana Advisory</span></td>
+        </tr>
+
+        <!-- 7. DILEEP BALAKRISHANA -->
+        <tr data-companies="mana">
+          <td class="row-num">07</td>
+          <td><div class="name-cell"><span class="name-main">Dileep Balakrishana</span></div></td>
+          <td><a class="email-link" href="mailto:dileep.balakrishana@manaadvisory.ae">dileep.balakrishana<span class="email-domain">@manaadvisory.ae</span></a></td>
+          <td><span class="designation">Commercial Manager</span></td>
+          <td><span class="company-badge badge-mana"><span class="dot dot-mana"></span>Mana Advisory</span></td>
+        </tr>
+
+        <!-- 8. KARIM BAIG -->
+        <tr data-companies="kha">
+          <td class="row-num">08</td>
+          <td><div class="name-cell"><span class="name-main">Karim Baig</span></div></td>
+          <td><a class="email-link" href="mailto:karim.baig@manaadvisory.ae">karim.baig<span class="email-domain">@manaadvisory.ae</span></a></td>
+          <td><span class="designation">Operations Manager</span></td>
+          <td><span class="company-badge badge-kha"><span class="dot dot-kha"></span>KHA Marine</span></td>
+        </tr>
+
+        <!-- 9. MOHAMMED AL MAZROOEI -->
+        <tr data-companies="mazboat mana">
+          <td class="row-num">09</td>
+          <td><div class="name-cell"><span class="name-main">Mohammed Al Mazrooei</span></div></td>
+          <td><a class="email-link" href="mailto:mohammed@manauae.com">mohammed<span class="email-domain">@manauae.com</span></a></td>
+          <td><span class="designation">Chairman &amp; Managing Director</span></td>
+          <td>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <span class="company-badge badge-mazboat"><span class="dot dot-mazboat"></span>Mazboat</span>
+              <span class="company-badge badge-mana"><span class="dot dot-mana"></span>Mana Advisory</span>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 10. KRAN SAREEN -->
+        <tr data-companies="serva">
+          <td class="row-num">10</td>
+          <td><div class="name-cell"><span class="name-main">Kran Sareen</span></div></td>
+          <td><a class="email-link" href="mailto:kran.sareen@manaadvisory.ae">kran.sareen<span class="email-domain">@manaadvisory.ae</span></a></td>
+          <td><span class="designation">Business Partner</span></td>
+          <td><span class="company-badge badge-serva"><span class="dot dot-serva"></span>Serva</span></td>
+        </tr>
+
+        <!-- 11. MALAK KAMAL -->
+        <tr data-companies="montaigne">
+          <td class="row-num">11</td>
+          <td><div class="name-cell"><span class="name-main">Malak Kamal</span></div></td>
+          <td><a class="email-link" href="mailto:malak.binghozi@manaadvisory.ae">malak.binghozi<span class="email-domain">@manaadvisory.ae</span></a></td>
+          <td><span class="designation">Senior Interior Designer</span></td>
+          <td><span class="company-badge badge-montaigne"><span class="dot dot-montaigne"></span>Montaigne Design</span></td>
+        </tr>
+
+        <!-- 12. MEGHALA RAMACHANDRAN -->
+        <tr data-companies="kha">
+          <td class="row-num">12</td>
+          <td><div class="name-cell"><span class="name-main">Meghala Ramachandran</span></div></td>
+          <td><a class="email-link" href="mailto:meghala.ramachandran@manaadvisory.ae">meghala.ramachandran<span class="email-domain">@manaadvisory.ae</span></a></td>
+          <td><span class="designation">Account Assistant</span></td>
+          <td><span class="company-badge badge-kha"><span class="dot dot-kha"></span>KHA Marine</span></td>
+        </tr>
+
+        <!-- 13. RONISSA LAGUERDER -->
+        <tr data-companies="mana">
+          <td class="row-num">13</td>
+          <td><div class="name-cell"><span class="name-main">Ronissa Laguerder</span></div></td>
+          <td><a class="email-link" href="mailto:ronissa.laguerder@manaadvisory.ae">ronissa.laguerder<span class="email-domain">@manaadvisory.ae</span></a></td>
+          <td><span class="designation">HR</span></td>
+          <td><span class="company-badge badge-mana"><span class="dot dot-mana"></span>Mana Advisory</span></td>
+        </tr>
+
+        <!-- 14. SANA ULLAH -->
+        <tr data-companies="mazboat">
+          <td class="row-num">14</td>
+          <td><div class="name-cell"><span class="name-main">Sana Ullah</span></div></td>
+          <td><a class="email-link" href="mailto:naval.arc@mazboat.com">naval.arc<span class="email-domain">@mazboat.com</span></a></td>
+          <td><span class="designation">—</span></td>
+          <td><span class="company-badge badge-mazboat"><span class="dot dot-mazboat"></span>Mazboat</span></td>
+        </tr>
+
+        <!-- 15. SUNIL KUMAR -->
+        <tr data-companies="mazboat mana">
+          <td class="row-num">15</td>
+          <td>
+            <div class="name-cell">
+              <span class="name-main">Sunil Kumar</span>
+              <span class="name-note">📌 Pending: billing@manaadvisory.ae domain to be assigned</span>
+            </div>
+          </td>
+          <td><a class="email-link" href="mailto:sunil.kumar@manaadvisory.ae">sunil.kumar<span class="email-domain">@manaadvisory.ae</span></a></td>
+          <td><span class="designation">Group Financial Controller</span></td>
+          <td>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <span class="company-badge badge-mazboat"><span class="dot dot-mazboat"></span>Mazboat</span>
+              <span class="company-badge badge-mana"><span class="dot dot-mana"></span>Mana Advisory</span>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 16. VINOD KUMAR -->
+        <tr data-companies="kha">
+          <td class="row-num">16</td>
+          <td><div class="name-cell"><span class="name-main">Vinod Kumar</span></div></td>
+          <td><a class="email-link" href="mailto:vinodkumar@manaadvisory.ae">vinodkumar<span class="email-domain">@manaadvisory.ae</span></a></td>
+          <td><span class="designation">Finance Manager</span></td>
+          <td><span class="company-badge badge-kha"><span class="dot dot-kha"></span>KHA Marine</span></td>
+        </tr>
+
+      </tbody>
+    </table>
+
+    <p class="no-results" id="noResults">No members found.</p>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <span class="footer-text">© 2026 Mana Advisory Group — Confidential</span>
+    <span class="footer-logo">Mana Advisory</span>
+  </footer>
+
+  <script>
+    const searchInput  = document.getElementById('searchInput');
+    const chips        = document.querySelectorAll('.chip');
+    const rows         = document.querySelectorAll('#tableBody tr');
+    const noResults    = document.getElementById('noResults');
+    const countEl      = document.getElementById('visibleCount');
+
+    let activeFilter = 'all';
+
+    function applyFilters() {
+      const q = searchInput.value.toLowerCase().trim();
+      let visible = 0;
+
+      rows.forEach(row => {
+        const text     = row.textContent.toLowerCase();
+        const comps    = row.dataset.companies || '';
+        const matchQ   = !q || text.includes(q);
+        const matchF   = activeFilter === 'all' || comps.includes(activeFilter);
+
+        if (matchQ && matchF) {
+          row.style.display = '';
+          visible++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      countEl.textContent = visible;
+      noResults.style.display = visible === 0 ? 'block' : 'none';
+
+      // Re-number visible rows
+      let n = 1;
+      rows.forEach(row => {
+        if (row.style.display !== 'none') {
+          row.querySelector('.row-num').textContent = String(n++).padStart(2,'0');
+        }
+      });
+    }
+
+    searchInput.addEventListener('input', applyFilters);
+
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        chips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        activeFilter = chip.dataset.filter;
+        applyFilters();
+      });
+    });
+  </script>
+</body>
+</html>
